@@ -8,23 +8,87 @@
  
     <h:head>
     	<title>JSF 2 - 101</title>
+    	<link rel="stylesheet" type="text/css" href="#{request.contextPath}/_script/css/global.css" />
+    	<script type="text/javascript">
+    	// FIXME: For some case, we don't want to 'reset' a form elements to 
+    	// current state. What we need is 'clear'/emptying the form elements.
+    	function resetForm(formId, asEmpty) {
+    		$(document).ready(function() {
+        		// TODO: Fix this annoying bug.
+        		if (asEmpty == true) {
+		    		$('#' + formId).each(function() {
+			    		this.reset();
+		    	     });
+        		} else {
+        			$('#' + formId).each(function() {
+        				this.reset();
+		    	     });
+            	}
+    		});
+        }
+        
+    	function onButtonSaveClicked(xhr, status, args) {
+    		resetForm('formAddAccount', true);
+    		accountDialog.hide();
+        }
+    	</script>
     </h:head>
+    
     <h:body>
         <h2>Account List</h2>
         
-    	<p:dataTable var="_account" value="#{accountListFaces.accounts}">
-    		<p:column>
-    			<f:facet name="header">ID</f:facet>
-    			<h:outputText value="#{_account.id}" />
-    		</p:column>
-    		<p:column>
-    			<f:facet name="header">Name</f:facet>
-    			<h:outputText value="#{_account.name}" />
-    		</p:column>
-    		<p:column>
-    			<f:facet name="header">Email</f:facet>
-    			<h:outputText value="#{_account.email}" />
-    		</p:column>
-    	</p:dataTable>
+        <p:button value="Create New Account" onclick="accountDialog.show()" href="javascript:void(0);" />
+        <br/><br/>
+        
+        <h:form id="formDataTable">
+	    	<p:dataTable id="accountDataTable" widgetVar="accountDataTable" var="_account" 
+	    		value="#{accountListHolder.accounts}">
+	    		
+	    		<p:column>
+	    			<f:facet name="header">ID</f:facet>
+	    			<h:outputText value="#{_account.id}" />
+	    		</p:column>
+	    		<p:column>
+	    			<f:facet name="header">Name</f:facet>
+	    			<h:outputText value="#{_account.name}" />
+	    		</p:column>
+	    		<p:column>
+	    			<f:facet name="header">Email</f:facet>
+	    			<h:outputText value="#{_account.email}" />
+	    		</p:column>
+	    		<p:column>
+	    			<f:facet name="header">Action</f:facet>
+	    			<h:commandButton styleClass="button-data-table" value="Edit" onclick="accountDialog.show()">
+	    				<f:ajax event="click" render=":formAddAccount" 
+	    					listener="#{accountListFaces.onButtonEditClicked(accountListHolder.indexOfAccount(_account))}" />
+	    			</h:commandButton>
+	    			&#160;
+	    			<h:commandButton styleClass="button-data-table" value="Delete">
+	    				<f:ajax event="click" render=":formDataTable"
+	    					listener="#{accountListFaces.onButtonDeleteClicked(_account)}" />
+	    			</h:commandButton>
+	    		</p:column>
+	    		
+	    	</p:dataTable>
+    	</h:form>
+    	
+    	<p:dialog header="Form Input / Edit Account" widgetVar="accountDialog" onHide="javascript:resetForm('formAddAccount', true)">
+    		<h:form id="formAddAccount">
+    			<h:inputHidden value="#{accountListFaces.accountInstance.id}" />
+    			<h:outputLabel for="name" value="Name " /><br/>
+            	<h:inputText value="#{accountListFaces.accountInstance.name}" id="name" />
+            	
+            	<br/><br/>
+            	
+            	<h:outputLabel for="email" value="Email " /><br/>
+            	<h:inputText value="#{accountListFaces.accountInstance.email}" id="email" />  
+            	
+            	<br/><br/>
+            	
+            	<p:commandButton value="Save" actionListener="#{accountListFaces.onButtonSaveClicked()}"
+            		oncomplete="onButtonSaveClicked(xhr, status, args)" update=":formDataTable:accountDataTable">
+            	</p:commandButton>
+    		</h:form>
+    	</p:dialog>
     </h:body>
 </html>
