@@ -1,36 +1,60 @@
 package org.xsalefter.jsf2101.faces;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.faces.bean.ManagedProperty;
 
 import org.xsalefter.jsf2101.model.Account;
 
 @ManagedBean
-@SessionScoped
 public class AccountListFaces {
 
-	private List<Account> accounts;
+	@ManagedProperty(value="#{accountListHolder}")
+	private AccountListHolder accountListHolder;
 	
-	public AccountListFaces() {
-	}
+	private Account accountInstance;
 	
 	@PostConstruct
-	public void onInit() {
-		this.accounts = new ArrayList<Account>();
-		this.accounts.add(new Account(1L, "test", "test@somewhere.com"));
-		this.accounts.add(new Account(1L, "foo", "foo@bar.com"));
-	}
-
-	public List<Account> getAccounts() {
-		return accounts;
-	}
-
-	public void setAccounts(List<Account> accounts) {
-		this.accounts = accounts;
+	public void postConstruct() {
+		if (this.accountInstance == null)
+			this.accountInstance = new Account();
 	}
 	
+	public void setAccountListHolder(AccountListHolder accountListHolder) {
+		this.accountListHolder = accountListHolder;
+	}
+
+	public Account getAccountInstance() {
+		return accountInstance;
+	}
+
+	public void setAccountInstance(Account accountInstance) {
+		this.accountInstance = accountInstance;
+	}
+
+	// -- Event
+	
+	public void onButtonSaveClicked() {
+		if (this.accountInstance.getId() != null) {
+			System.out.println("... Edit account instance: " + this.accountInstance.getId());
+			this.accountListHolder.editAccount(this.accountInstance);
+		} else {
+			System.out.println("... New account instance..");
+			
+			this.accountListHolder.addAccount(this.accountInstance);
+		}
+		this.accountInstance = null;
+	}
+
+	public void onButtonEditClicked(int accountIndex) {
+		this.accountInstance = this.accountListHolder.get(accountIndex);
+	}
+	
+	public void onButtonDeleteClicked(Account account) {
+		int index = this.accountListHolder.indexOfAccount(account);
+		if (index >= 0)
+			this.accountListHolder.removeAccount(index);
+		else
+			System.out.println("Unknown index..");
+	}
 }
