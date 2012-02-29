@@ -1,0 +1,11 @@
+body {
+	font-family: verdana, helvetica;
+	font-size: 75%;
+}
+
+.button-data-table {
+	font-size: 70% !important;
+	cursor: pointer;
+	background-color: #dddddd !important;
+	border: #aaaaaa 1px solid !important;
+}
